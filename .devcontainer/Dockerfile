@@ -4,7 +4,7 @@ RUN apt-get update && apt-get upgrade
 
 RUN apt-get install -y \
     build-essential cmake git pkg-config \
-    libx11-dev libxcursor-dev libxrandr-dev libxi-dev \
+    libx11-dev libxcursor-dev libxrandr-dev libxi-dev libusb-1.0-0-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

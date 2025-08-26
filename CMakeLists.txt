@@ -5,16 +5,16 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(BUILD_WITH_SDL3 "use bundled sdl3" ON)
-option(BUILD_WITH_BGFX "use bundled bgfx" OFF)
+option(BUILD_WITH_BGFX "use bundled bgfx" ON)
 
 if(BUILD_WITH_SDL3)
   add_subdirectory(external/sdl3)
 endif()
 
 if(BUILD_WITH_BGFX)
-  add_subdirectory(external/bx)
-  add_subdirectory(external/bimg)
-  add_subdirectory(external/bgfx)
+  set(BGFX_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+  set(BGFX_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
+  add_subdirectory(external/bgfx-cmake)
 endif()
 
 add_subdirectory(src)
