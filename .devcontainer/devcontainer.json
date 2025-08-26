@@ -1,0 +1,21 @@
+{
+  "name": "Simulator Development Container",
+  "privileged": true,
+  "remoteUser": "root",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "USERNAME": "root"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cpptools-themes",
+        "twxs.cmake",
+        "eamodio.gitlens"
+      ]
+    }
+  }
+}
