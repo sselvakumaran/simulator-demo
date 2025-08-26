@@ -1,0 +1,2 @@
+- replace bgfx modules with bgfx-cmake branch (https://github.com/bkaradzic/bgfx.cmake)
+- support bgfx

@@ -1,12 +1,12 @@
-[submodule "vendor/sdl3"]
-	path = vendor/sdl3
+[submodule "external/sdl3"]
+	path = external/sdl3
 	url = https://github.com/libsdl-org/SDL.git
-[submodule "vendor/bx"]
-	path = vendor/bx
-	url = https://github.com/bkaradzic/bx.git
-[submodule "vendor/bimg"]
-	path = vendor/bimg
-	url = https://github.com/bkaradzic/bimg.git
-[submodule "vendor/bgfx"]
-	path = vendor/bgfx
+[submodule "external/bgfx"]
+	path = external/bgfx
 	url = https://github.com/bkaradzic/bgfx.git
+[submodule "external/bimg"]
+	path = external/bimg
+	url = https://github.com/bkaradzic/bimg.git
+[submodule "external/bx"]
+	path = external/bx
+	url = https://github.com/bkaradzic/bx.git
