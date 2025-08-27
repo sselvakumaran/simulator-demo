@@ -1,6 +1,29 @@
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
+#include <bgfx/bgfx.h>
+#include <bgfx/platform.h>
 #include <iostream>
+#include "platform/platform_window.h"
+
+inline bool WindowInit(SDL_Window* window) {
+  if (!window) {
+    std::cerr << "failed to set window: " << SDL_GetError() << std::endl;
+    return false;
+  }
+  bgfx::PlatformData pd = get_pd(window);
+
+  bgfx::Init init;
+  init.type = bgfx::RendererType::Count;
+  init.resolution.width = 800;
+  init.resolution.height = 600;
+  init.resolution.reset = BGFX_RESET_VSYNC;
+  init.platformData = pd;
+  init.vendorId = BGFX_PCI_ID_NONE;
+  if (!bgfx::init(init))
+    return false;
+  return true;
+}
+
 
 int main(int argc, char* argv[]) {
   if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -13,20 +36,28 @@ int main(int argc, char* argv[]) {
     SDL_WINDOW_RESIZABLE
   );
 
-  if (!window) {
-    std::cerr << "failed to create window: " << SDL_GetError() << std::endl;
-    SDL_Quit();
+  if (!WindowInit(window)) {
+    std::cerr << "failed to initialize bgfx" << std::endl;
     return 1;
   }
 
+  std::cout << "launching" << std::endl;
+
   bool running = true;
+  SDL_Event event;
   while (running) {
-    SDL_Event event;
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_EVENT_QUIT) running = false;
     }
+
+    bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x3030a0ff, 1.0f, 0);
+
+    bgfx::setViewRect(0,0,0,uint16_t(800), uint16_t(600));
+    bgfx::touch(0);
+    bgfx::frame();
   }
 
+  bgfx::shutdown();
   SDL_DestroyWindow(window);
   SDL_Quit();
   return 0;
