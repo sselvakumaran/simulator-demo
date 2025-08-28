@@ -10,20 +10,26 @@ inline bool WindowInit(SDL_Window* window) {
     std::cerr << "failed to set window: " << SDL_GetError() << std::endl;
     return false;
   }
+  std::cout << "Getting platform data..." << std::endl;
   bgfx::PlatformData pd = get_pd(window);
+  std::cout << "Platform data obtained. nwh: " << pd.nwh << ", ndt: " << pd.ndt << std::endl;
 
   bgfx::Init init;
   init.type = bgfx::RendererType::Count;
   init.resolution.width = 800;
   init.resolution.height = 600;
   init.resolution.reset = BGFX_RESET_VSYNC;
+  init.debug = BGFX_DEBUG_TEXT;
   init.platformData = pd;
   init.vendorId = BGFX_PCI_ID_NONE;
-  if (!bgfx::init(init))
+  std::cout << "Initializing bgfx..." << std::endl;
+  if (!bgfx::init(init)) {
+    std::cerr << "bgfx::init failed" << std::endl;
     return false;
+  }
+  std::cout << "bgfx initialized successfully" << std::endl;
   return true;
 }
-
 
 int main(int argc, char* argv[]) {
   if (!SDL_Init(SDL_INIT_VIDEO)) {
@@ -49,11 +55,10 @@ int main(int argc, char* argv[]) {
     while (SDL_PollEvent(&event)) {
       if (event.type == SDL_EVENT_QUIT) running = false;
     }
-
-    bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x3030a0ff, 1.0f, 0);
-
-    bgfx::setViewRect(0,0,0,uint16_t(800), uint16_t(600));
+    bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0xff0000ff, 1.0f, 0);
+    bgfx::setViewRect(0, 0, 0, 800, 600);
     bgfx::touch(0);
+
     bgfx::frame();
   }
 
