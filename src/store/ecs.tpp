@@ -3,7 +3,7 @@
 #include "ecs.h"
 #include <typeindex>
 #include <memory>
-
+#include <ranges>
 
 template<typename T>
 void Component<T>::add(Entity entity, T component) {
@@ -27,10 +27,26 @@ void Component<T>::remove(Entity entity) {
 }
 
 template<typename T>
-T& Component<T>::get(Entity entity) {
-  return components[entity_to_index[entity]];
+bool Component<T>::has(Entity entity) {
+  return entity_to_index.find(entity) != entity_to_index.end();
 }
 
+template<typename T>
+T& Component<T>::get(Entity entity) {
+  if (has(entity))
+    return components[entity_to_index[entity]];
+  throw std::runtime_error("Entity not found");
+}
+
+template<typename T>
+std::vector<T>& Component<T>::getComponents() {
+  return components;
+} 
+
+template<typename T>
+auto Component<T>::getEntities() {
+  return entity_to_index | std::views::keys;
+} 
 
 
 template<typename T>
@@ -43,23 +59,36 @@ Component<T>& EntityComponentSystem::getStorage() {
 
 template<typename T>
 void EntityComponentSystem::addComponent(Entity entity, T component) {
-    getStorage<T>().add(entity, component);
+  getStorage<T>().add(entity, component);
 }
 
 template<typename T>
 void EntityComponentSystem::removeComponent(Entity entity) {
-    getStorage<T>().remove(entity);
+  getStorage<T>().remove(entity);
 }
 
 template<typename T>
 T& EntityComponentSystem::getComponent(Entity entity) {
-    return getStorage<T>().get(entity);
+  return getStorage<T>().get(entity);
 }
 
-template<typename ComponentType, typename Func>
-void EntityComponentSystem::forEach(Func func) {
-  auto& storage = getStorage<ComponentType>();
+template<typename T>
+bool EntityComponentSystem::hasComponent(Entity entity) {
+  return getStorage<T>().has(entity);
+}
 
-  for (ComponentType component : storage.components)
-    func(component);
+
+template<typename FirstComponentType, typename... OtherComponentTypes, typename Func>
+void EntityComponentSystem::forEach(Func func) {
+  auto& storage = getStorage<FirstComponentType>();
+
+  if constexpr (sizeof...(OtherComponentTypes) == 0) {
+    for (Entity e : storage.getEntities())
+      func(getComponent<FirstComponentType>(e));
+  } else {
+    for (Entity e : storage.getEntities()) {
+      if ((hasComponent<OtherComponentTypes>(e) && ...))
+        func(getComponent<FirstComponentType>(e), getComponent<OtherComponentTypes>(e)...);
+    }
+  }
 }

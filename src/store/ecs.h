@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <cstddef>
 #include <typeindex>
+#include <ranges>
 #include <memory>
 
 using Entity = uint32_t;
@@ -13,13 +14,16 @@ class ComponentBase {public: virtual ~ComponentBase() = default;};
 
 template<typename T>
 class Component: public ComponentBase {
+  std::vector<T> components;
   std::unordered_map<Entity, size_t> entity_to_index;
   std::vector<Entity> index_to_entity;
 public:
-  std::vector<T> components;
   void add(Entity entity, T component);
   void remove(Entity entity);
+  bool has(Entity entity);
   T& get(Entity entity);
+  std::vector<T>& getComponents();
+  auto getEntities();
 };
 
 class EntityComponentSystem {
@@ -37,12 +41,11 @@ public:
   template<typename T>
   T& getComponent(Entity entity);
 
-  template<typename ComponentType, typename Func>
+  template<typename T>
+  bool hasComponent(Entity entity);
+
+  template<typename FirstComponentType, typename... OtherComponentTypes, typename Func>
   void forEach(Func func);
-
-  // template<typename FirstComponentType, typename... OtherComponentTypes, typename Func>
-  // void forEach(Func func);
-
 };
 
 #include "ecs.tpp"
