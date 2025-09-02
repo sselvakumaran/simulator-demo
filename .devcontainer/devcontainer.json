@@ -13,7 +13,7 @@
       "extensions": [
         "ms-vscode.cpptools",
         "ms-vscode.cpptools-themes",
-        "twxs.cmake",
+        "ms-vscode.cpptools-extension-pack",
         "eamodio.gitlens"
       ]
     }

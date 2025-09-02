@@ -68,7 +68,6 @@ inline bool WindowInit(SDL_Window* window) {
   }
   std::cout << "Getting platform data..." << std::endl;
   bgfx::PlatformData pd = get_pd(window);
-  std::cout << "Platform data obtained. nwh: " << pd.nwh << ", ndt: " << pd.ndt << std::endl;
 
   bgfx::Init init;
   init.type = bgfx::RendererType::Count;
