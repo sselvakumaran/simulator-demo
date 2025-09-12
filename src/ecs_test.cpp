@@ -1,6 +1,6 @@
 #include "store/ecs.h"
 #include <iostream>
-
+#include <chrono>
 struct Position {
   int x, y;
 };
@@ -11,15 +11,16 @@ struct Velocity {
 
 
 int main() {
+  const int N = 10000;
+
   EntityComponentSystem ecs;
   Entity e1 = 1, e2 = 2;
-  ecs.addComponent<Position>(e1, {0, 0});
-  ecs.addComponent<Position>(e2, {5, 5});
-  ecs.addComponent<Velocity>(e2, {-2, -2});
 
-  ecs.forEach<Position>([](Position& k) {
-    printf("Entity at (%d, %d)\n", k.x, k.y);
-  });
+  for (int i = 0; i < N; ++i) {
+    ecs.addComponent<Position>(Entity(i), Position{i, i});
+    if (i % 10 < 9)
+      ecs.addComponent<Velocity>(Entity(i), Velocity{-1, -1});
+  }
 
   int numChanged = 0;
 

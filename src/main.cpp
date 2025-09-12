@@ -6,6 +6,13 @@
 #include <iostream>
 #include "platform/platform_window.h"
 
+
+// SHADERS
+// #include <essl/fs_cubes.sc.bin.h>
+// #include <essl/s_cubes.sc.bin.h>
+
+
+
 struct PosColorVertex {
     float x, y, z;
     uint32_t abgr;
@@ -20,44 +27,86 @@ struct PosColorVertex {
 
 bgfx::VertexLayout PosColorVertex::layout;
 
-static PosColorVertex s_cubeVertices[] = {
-    {-1.0f,  1.0f,  1.0f, 0xff0000ff }, // 0
-    { 1.0f,  1.0f,  1.0f, 0xff00ff00 }, // 1
-    {-1.0f, -1.0f,  1.0f, 0xffff0000 }, // 2
-    { 1.0f, -1.0f,  1.0f, 0xffffffff }, // 3
-    {-1.0f,  1.0f, -1.0f, 0xff0000ff }, // 4
-    { 1.0f,  1.0f, -1.0f, 0xff00ff00 }, // 5
-    {-1.0f, -1.0f, -1.0f, 0xffff0000 }, // 6
-    { 1.0f, -1.0f, -1.0f, 0xffffffff }, // 7
-};
-static const uint16_t s_cubeIndices[] = {
-    0, 1, 2, 1, 3, 2,
-    4, 6, 5, 5, 6, 7,
-    0, 2, 4, 4, 2, 6,
-    1, 5, 3, 5, 7, 3,
-    0, 4, 1, 4, 5, 1,
-    2, 3, 6, 6, 3, 7,
+uint32_t colors[6] = {
+  0xff0000ff, 
+  0xff00ffff,
+  0xff00ff00, 
+  0xffffff00, 
+  0xffff0000, 
+  0xffff00ff
 };
 
-bgfx::ShaderHandle loadShader(const char* filename) {
+float points[8][3] = {
+  {-1.0f, 1.0f, 1.0f},
+  {1.0f, 1.0f, 1.0f},
+  {-1.0f, -1.0f, 1.0f},
+  {1.0f, -1.0f, 1.0f},
+  {-1.0f, 1.0f, -1.0f},
+  {1.0f, 1.0f, -1.0f},
+  {-1.0f, -1.0f, -1.0f},
+  {1.0f, -1.0f, -1.0f}
+};
+
+PosColorVertex makeVertex(int point, int color) {
+    return { points[point][0], points[point][1], points[point][2], colors[color] };
+}
+static PosColorVertex s_cubeVertices[] = {
+    // Front face (0, 1, 3, 2)
+    makeVertex(0, 4), makeVertex(1, 4), makeVertex(3, 4), makeVertex(2, 4),
+    // Back face (4, 5, 7, 6)
+    makeVertex(4, 5), makeVertex(6, 5), makeVertex(7, 5), makeVertex(5,5),
+    // Left face (0, 2, 6, 4)
+    makeVertex(0, 2), makeVertex(2, 2), makeVertex(6, 2), makeVertex(4,2),
+    // Right face (1, 5, 7, 3)
+    makeVertex(1, 3), makeVertex(5, 3), makeVertex(7, 3), makeVertex(3,3),
+    // Top face (0, 4, 5, 1)
+    makeVertex(0, 0), makeVertex(4, 0), makeVertex(5, 0), makeVertex(1,0),
+    // Bottom face (2, 3, 7, 6)
+    makeVertex(2, 1), makeVertex(3, 1), makeVertex(7, 1), makeVertex(6,1),
+};
+static const uint16_t s_cubeIndices[] = {
+    // Front face (vertex indices: 0, 1, 2, 3)
+    0, 1, 2, 0, 2, 3,
+    // Back face (vertex indices: 4, 5, 6, 7)
+    4, 5, 6, 4, 6, 7,
+    // Left face (vertex indices: 8, 9, 10, 11)
+    8, 9, 10, 8, 10, 11,
+    // Right face (vertex indices: 12, 13, 14, 15)
+    12, 13, 14, 12, 14, 15,
+    // Top face (vertex indices: 16, 17, 18, 19)
+    16, 17, 18, 16, 18, 19,
+    // Bottom face (vertex indices: 20, 21, 22, 23)
+    20, 21, 22, 20, 22, 23
+};
+
+bgfx::ShaderHandle loadEmbeddedShader(const uint8_t* data, uint32_t size) {
+    const bgfx::Memory* mem = bgfx::copy(data, size);
+    return bgfx::createShader(mem);
+}
+
+bgfx::ShaderHandle loadShader(const uint8_t* data, uint32_t size) {
+    const bgfx::Memory* mem = bgfx::copy(data, size);
+    return bgfx::createShader(mem);
+}
+
+bgfx::ShaderHandle loadShaderFile(const char* filename) {
     FILE* file = fopen(filename, "rb");
     if (!file) {
-        std::cerr << "Failed to open shader: " << filename << std::endl;
-        return BGFX_INVALID_HANDLE;
+      std::cerr << "Failed to open shader: " << filename << std::endl;
+      return BGFX_INVALID_HANDLE;
     }
     fseek(file, 0, SEEK_END);
     long size = ftell(file);
     fseek(file, 0, SEEK_SET);
-    const bgfx::Memory* mem = bgfx::alloc(size+1);
+    const bgfx::Memory* mem = bgfx::alloc(size);
     fread(mem->data, 1, size, file);
     fclose(file);
-    mem->data[mem->size-1] = '\0';
     return bgfx::createShader(mem);
 }
 
-bgfx::ProgramHandle loadProgram(const char* vsName, const char* fsName) {
-    bgfx::ShaderHandle vsh = loadShader(vsName);
-    bgfx::ShaderHandle fsh = loadShader(fsName);
+bgfx::ProgramHandle createProgramFromFile() {
+    bgfx::ShaderHandle vsh = loadShaderFile("shaders/glsl/vs_cubes.sc.bin");
+    bgfx::ShaderHandle fsh = loadShaderFile("shaders/glsl/fs_cubes.sc.bin");
     return bgfx::createProgram(vsh, fsh, true);
 }
 
@@ -110,7 +159,7 @@ int main(int argc, char* argv[]) {
   bgfx::IndexBufferHandle ibh = bgfx::createIndexBuffer(
     bgfx::makeRef(s_cubeIndices, sizeof(s_cubeIndices))
   );
-  bgfx::ProgramHandle program = loadProgram("vs_cubes.bin", "fs_cubes.bin");
+  bgfx::ProgramHandle program = createProgramFromFile();
 
   std::cout << "launching" << std::endl;
 
@@ -140,7 +189,7 @@ int main(int argc, char* argv[]) {
     bgfx::setTransform(mtx);
     bgfx::setVertexBuffer(0, vbh);
     bgfx::setIndexBuffer(ibh);
-    bgfx::setState(BGFX_STATE_DEFAULT);
+    bgfx::setState(BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_WRITE_Z | BGFX_STATE_DEPTH_TEST_LESS | BGFX_STATE_CULL_CW);
     bgfx::submit(0, program);
 
 
