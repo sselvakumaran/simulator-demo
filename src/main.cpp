@@ -6,13 +6,6 @@
 #include <iostream>
 #include "platform/platform_window.h"
 
-
-// SHADERS
-// #include <essl/fs_cubes.sc.bin.h>
-// #include <essl/s_cubes.sc.bin.h>
-
-
-
 struct PosColorVertex {
     float x, y, z;
     uint32_t abgr;
@@ -51,17 +44,11 @@ PosColorVertex makeVertex(int point, int color) {
     return { points[point][0], points[point][1], points[point][2], colors[color] };
 }
 static PosColorVertex s_cubeVertices[] = {
-    // Front face (0, 1, 3, 2)
     makeVertex(0, 4), makeVertex(1, 4), makeVertex(3, 4), makeVertex(2, 4),
-    // Back face (4, 5, 7, 6)
     makeVertex(4, 5), makeVertex(6, 5), makeVertex(7, 5), makeVertex(5,5),
-    // Left face (0, 2, 6, 4)
     makeVertex(0, 2), makeVertex(2, 2), makeVertex(6, 2), makeVertex(4,2),
-    // Right face (1, 5, 7, 3)
     makeVertex(1, 3), makeVertex(5, 3), makeVertex(7, 3), makeVertex(3,3),
-    // Top face (0, 4, 5, 1)
     makeVertex(0, 0), makeVertex(4, 0), makeVertex(5, 0), makeVertex(1,0),
-    // Bottom face (2, 3, 7, 6)
     makeVertex(2, 1), makeVertex(3, 1), makeVertex(7, 1), makeVertex(6,1),
 };
 static const uint16_t s_cubeIndices[] = {
@@ -89,9 +76,9 @@ bgfx::ShaderHandle loadShaderFile(const char* filename) {
 }
 
 bgfx::ProgramHandle createProgramFromFile() {
-    bgfx::ShaderHandle vsh = loadShaderFile("shaders/cubes/glsl/vertex.sc.bin");
-    bgfx::ShaderHandle fsh = loadShaderFile("shaders/cubes/glsl/fragment.sc.bin");
-    return bgfx::createProgram(vsh, fsh, true);
+  bgfx::ShaderHandle vsh = loadShaderFile("shaders/cubes/glsl/cubes_vs.sc.bin");
+  bgfx::ShaderHandle fsh = loadShaderFile("shaders/cubes/glsl/cubes_fs.sc.bin");
+  return bgfx::createProgram(vsh, fsh, true);
 }
 
 inline bool WindowInit(SDL_Window* window) {

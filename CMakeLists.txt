@@ -42,7 +42,3 @@ if(BUILD_WITH_BGFX)
 endif()
 
 add_subdirectory(src)
-
-set_target_properties(simulator PROPERTIES
-  RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
-)
