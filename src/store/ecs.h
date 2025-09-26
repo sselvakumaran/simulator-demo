@@ -56,6 +56,12 @@ public:
     void forEach(Func func);
   template<typename... ComponentTypes, typename Func>
     void forEachWithEntity(Func func);
+  template<typename... ComponentTypes> struct ComponentJoin {
+    std::vector<Entity> entities;
+    std::tuple<std::vector<ComponentTypes>...> arrays;
+  };
+  template<typename... ComponentTypes>
+  EntityComponentSystem::ComponentJoin<ComponentTypes...> joinComponents();
 };
 
 #include "ecs.tpp"

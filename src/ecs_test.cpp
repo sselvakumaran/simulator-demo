@@ -29,9 +29,8 @@ int main() {
     p.y += v.dy;
   });
 
-  ecs.forEach<Position>([](Position& k) {
-    printf("Entity at (%d, %d)\n", k.x, k.y);
-  });
+  EntityComponentSystem::ComponentJoin<Position, Velocity> buffers = 
+    ecs.joinComponents<Position, Velocity>();
 
   return 0;
 }

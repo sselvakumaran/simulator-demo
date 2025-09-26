@@ -36,7 +36,7 @@ void Component<T>::emplace(Entity entity, Arguments&&... args) {
 template<typename T>
 void Component<T>::remove(Entity entity) {
   auto index_iterator = entity_to_index.find(entity);
-  if (index_iterator = entity_to_index.end()) return;
+  if (index_iterator == entity_to_index.end()) return;
 
   size_t index = index_iterator->second;
   size_t last_index = components.size() - 1;
@@ -209,3 +209,22 @@ void EntityComponentSystem::forEachWithEntity(Func func) {
     }
   }
 }
+template<typename... ComponentTypes>
+EntityComponentSystem::ComponentJoin<ComponentTypes...>
+EntityComponentSystem::joinComponents() {
+  ComponentJoin<ComponentTypes...> result;
+  std::vector<ComponentBase*> storages_vec = { &this->getComponentStorage<ComponentTypes>()... };
+  ComponentBase* smallest = ecs_detail::pick_smallest_storage(storages_vec);
+
+  for (Entity e : smallest->getEntities()) {
+    if ((this->getComponentStorage<ComponentTypes>().has(e) && ...)) {
+      result.entities.push_back(e);
+      (std::get<std::vector<ComponentTypes>>(result.arrays).push_back(
+        this->getComponentStorage<ComponentTypes>().get(e)
+      ), ...);
+    }
+  }
+
+  return result;
+}
+

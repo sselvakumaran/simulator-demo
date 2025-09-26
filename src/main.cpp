@@ -65,48 +65,32 @@ static PosColorVertex s_cubeVertices[] = {
     makeVertex(2, 1), makeVertex(3, 1), makeVertex(7, 1), makeVertex(6,1),
 };
 static const uint16_t s_cubeIndices[] = {
-    // Front face (vertex indices: 0, 1, 2, 3)
     0, 1, 2, 0, 2, 3,
-    // Back face (vertex indices: 4, 5, 6, 7)
     4, 5, 6, 4, 6, 7,
-    // Left face (vertex indices: 8, 9, 10, 11)
     8, 9, 10, 8, 10, 11,
-    // Right face (vertex indices: 12, 13, 14, 15)
     12, 13, 14, 12, 14, 15,
-    // Top face (vertex indices: 16, 17, 18, 19)
     16, 17, 18, 16, 18, 19,
-    // Bottom face (vertex indices: 20, 21, 22, 23)
     20, 21, 22, 20, 22, 23
 };
 
-bgfx::ShaderHandle loadEmbeddedShader(const uint8_t* data, uint32_t size) {
-    const bgfx::Memory* mem = bgfx::copy(data, size);
-    return bgfx::createShader(mem);
-}
-
-bgfx::ShaderHandle loadShader(const uint8_t* data, uint32_t size) {
-    const bgfx::Memory* mem = bgfx::copy(data, size);
-    return bgfx::createShader(mem);
-}
-
 bgfx::ShaderHandle loadShaderFile(const char* filename) {
-    FILE* file = fopen(filename, "rb");
-    if (!file) {
-      std::cerr << "Failed to open shader: " << filename << std::endl;
-      return BGFX_INVALID_HANDLE;
-    }
-    fseek(file, 0, SEEK_END);
-    long size = ftell(file);
-    fseek(file, 0, SEEK_SET);
-    const bgfx::Memory* mem = bgfx::alloc(size);
-    fread(mem->data, 1, size, file);
-    fclose(file);
-    return bgfx::createShader(mem);
+  FILE* file = fopen(filename, "rb");
+  if (!file) {
+    std::cerr << "Failed to open shader: " << filename << std::endl;
+    return BGFX_INVALID_HANDLE;
+  }
+  fseek(file, 0, SEEK_END);
+  long size = ftell(file);
+  fseek(file, 0, SEEK_SET);
+  const bgfx::Memory* mem = bgfx::alloc(size);
+  fread(mem->data, 1, size, file);
+  fclose(file);
+  return bgfx::createShader(mem);
 }
 
 bgfx::ProgramHandle createProgramFromFile() {
-    bgfx::ShaderHandle vsh = loadShaderFile("shaders/glsl/vs_cubes.sc.bin");
-    bgfx::ShaderHandle fsh = loadShaderFile("shaders/glsl/fs_cubes.sc.bin");
+    bgfx::ShaderHandle vsh = loadShaderFile("shaders/cubes/glsl/vertex.sc.bin");
+    bgfx::ShaderHandle fsh = loadShaderFile("shaders/cubes/glsl/fragment.sc.bin");
     return bgfx::createProgram(vsh, fsh, true);
 }
 
